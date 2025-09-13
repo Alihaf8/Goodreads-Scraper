@@ -21,14 +21,18 @@ class BookScraper(Base):
         self.url = url
         self.page_source = None
         self.books = None
+        self.launch_page()
+        self.search()
 
     def search(self):
-        """Handles the core search functionality: locates the search bar and enters the user's query."""
+        """Handles the core search functionality: locates the search bar and enters the
+user's query."""
         # Wait for and locate the search input field
         search_element = self.wait.until(
             EC.presence_of_element_located((By.ID, "sitesearch_field")))
 
-        # Simulate human-like interaction: move to element, pause, click, type query, and press ENTER
+        # Simulate human-like interaction: move to element, pause, click, type query, an
+d press ENTER
         query = self.user_search_query()
 
         self.actions.move_to_element(search_element).pause(
@@ -103,7 +107,7 @@ class BookScraper(Base):
             print("*** 2: Load the next page of results")
             print("*** 3: Search Again")
             print("*** 4: Return to the main menu")
-            print("*** 5: Clear books")
+            print("*** 5: Clear books from 'books.csv' file")
             print("*** 6: Exit the program")
             user_choice = input("\nPlease choose an option (1-6): ").strip()
 
@@ -117,7 +121,7 @@ class BookScraper(Base):
                     self.launch_page()
                     return self.search()
                 elif user_choice == 4:
-                    return self.get_user_choice()
+                    return None
                 elif user_choice == 5:
                     clear_csv_file()
                     print(f"{' Cleared Book Successfully !':*>30}")
@@ -168,7 +172,8 @@ class BookScraper(Base):
         return soup.find("div", class_="RatingStatistics__rating").text
 
     def genres(self, soup):
-        """Extracts the list of genres by clicking the 'Show more' button if necessary."""
+        """Extracts the list of genres by clicking the 'Show more' button if necessary."
+""
         genre_text = []
         try:
             # Find and click the "Show more" button for genres
@@ -285,7 +290,8 @@ class BookScraper(Base):
         """Prompts the user to select a book from the list and validates the input."""
         while True:
             user_input = input(
-                f"\nEnter the number of the book you want to see (1-{len(self.books)}), or 'E' to cancel: "
+                f"\nEnter the number of the book you want to see (1-{len(self.books)}),
+or 'E' to cancel: "
             ).strip()
 
             try:
