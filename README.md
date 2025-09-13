@@ -62,5 +62,3 @@ A powerful and efficient Python scraper built with Selenium and BeautifulSoup4 t
     *   Choose between scraping **Books** or **Quotes**.
     *   Enter your search query.
     *   Navigate results and view details.
-
-## 📁 Project Structure
