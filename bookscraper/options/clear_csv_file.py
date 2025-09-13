@@ -4,7 +4,7 @@ import os, csv
 
 def clear_csv_file():
     for _ in range(10):
-        if not os.path.basename(os.getcwd()) == "goodreads":
+        if not "goodreads" in os.path.basename(os.getcwd()).lower():
             os.chdir('..')
 
     if not os.path.exists(CSV_PATH):
