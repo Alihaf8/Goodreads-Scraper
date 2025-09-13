@@ -20,11 +20,14 @@ class QuoteScraper(Base):
         super().__init__(url, user_agent)
         self.url = url
         self.quotes = None
+        self.launch_page()
+        self.search_quotes()
 
     def user_search_quote(self):
         while True:
             user_query = input(
-                "\nEnter a quote subject (e.g. [Love, Life, Wisdom, etc...] or 'E' to EXIT): "
+                "\nEnter a quote subject (e.g. [Love, Life, Wisdom, etc...] or 'E' to EX
+IT): "
             ).strip()
 
             if user_query == "":
@@ -74,7 +77,9 @@ class QuoteScraper(Base):
             print("=" * 50)
 
         else:
-            print(f"\n\n\t{'No Results Found !':*>20}")
+            print(f"\n\n\t{'No Results Found !':*>30}")
+            self.launch_page()
+            return self.search_quotes()
 
         self.ask_user_for_quote_action()
 
@@ -100,7 +105,7 @@ class QuoteScraper(Base):
                     self.launch_page()
                     return self.search_quotes()
                 elif user_choice == 3:
-                    return self.get_user_choice()
+                    return None
                 elif user_choice == 4:
                     self.save_specified_quote()
                     continue
@@ -151,13 +156,14 @@ class QuoteScraper(Base):
     def save_specified_quote(self):
         while True:
             user_index = input(
-                f"\nEnter the quote index (number) from the list above (1-{len(self.quotes)}), or 'E' to get back to the menu: "
+                f"\nEnter the quote index (number) from the list above (1-{len(self.quot
+es)}), or 'E' to get back to the menu: "
             )
 
             try:
                 user_index = int(user_index)
                 if user_index <= len(self.quotes):
-                    print(f"\n{'Quote Saved Successfully':^*30}")
+                    print(f"\n{'Quote Saved Successfully':*^30}")
                     return save_to_txt(self.quotes[user_index - 1].text)
                 else:
                     print(
