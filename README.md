@@ -30,10 +30,10 @@ A powerful and efficient Python scraper built with Selenium and BeautifulSoup4 t
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/Alihaf8/Goodreads-Scraper.git
-    cd Goodreads-Scraper
+    git clone https://github.com/Alihaf8/Goodreads-Scraper.git goodreads
+    cd goodreads
     ```
-
+> **Note:** Do not attempt to change the folder name ``` goodreads ``` ! or the project might get broken.
 2.  **Install Python dependencies:**
     ```bash
     pip install -r requirements.txt
@@ -44,6 +44,10 @@ A powerful and efficient Python scraper built with Selenium and BeautifulSoup4 t
     *   **On Termux (Android):** You can install it with:
         ```bash
         pkg install chromium chromedriver
+        ```
+        or
+        ```bash
+         pkg install chromium -y
         ```
     *   **On Other Systems:** Download it from the [official site](https://sites.google.com/chromium.org/driver/) and ensure it's accessible.
 
