@@ -5,7 +5,7 @@ from exit.exit import UserExit, ProgramExit
 from constants.constants import AGENT, BASE_URL
 import os
 
-# Not Important
+# Important for a vnc server
 # os.environ["DISPLAY"] = ":1"
 
 
@@ -15,19 +15,16 @@ def main():
         scraper = ""
         # Base class
         base = Base(BASE_URL, AGENT)
-        user_in = base.get_user_choice()
 
-        if user_in == 1:
-            # Scrape Books
-            scraper = BookScraper(BASE_URL, AGENT)
-            scraper.launch_page()
-            scraper.search()
+        while True:
+            user_in = base.get_user_choice()
+            if user_in == 1:
+                # Scrape Books
+                scraper = BookScraper(BASE_URL, AGENT)
 
-        else:
-            # Scrape Quotes
-            scraper = QuoteScraper(BASE_URL + "/quotes", AGENT)
-            scraper.launch_page()
-            scraper.search_quotes()
+            else:
+                # Scrape Quotes
+                scraper = QuoteScraper(BASE_URL + "/quotes", AGENT)
 
         exiting(scraper)
     except (UserExit, ProgramExit):
