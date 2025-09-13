@@ -14,7 +14,8 @@ from bs4 import BeautifulSoup
 class Base:
 
     def __init__(self, url, user_agent):
-        """Initializes the scraper, sets up the browser, and launches the starting page."""
+        """Initializes the scraper, sets up the browser, and launches the starting page.
+"""
         # Configure Chrome browser options
         options = Options()
         options.add_argument("--no-sandbox")
@@ -54,7 +55,6 @@ class Base:
             modal_popup = self.soup(self.driver.page_source).find(
                 "div", class_="modal__content")
             if modal_popup:
-                print("Popup detected. Refreshing page...")
                 self.driver.get(current_url)  # Refresh to dismiss popup
 
         except Exception as e:
