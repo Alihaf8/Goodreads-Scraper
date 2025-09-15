@@ -80,9 +80,8 @@ class QuoteScraper(Base):
             print("*** 3: Return to the main menu")
             print("*** 4: Save a specified quote to 'quotes.txt' file")
             print("*** 5: Save quotes to 'quotes.txt' file")
-            print("*** 6: Clear 'quotes.txt' file")
-            print("*** 7: Exit the program")
-            user_choice = input("\nPlease choose an option (1-7): ").strip()
+            print("*** 6: Exit the program")
+            user_choice = input("\nPlease choose an option (1-6): ").strip()
 
             try:
                 user_choice = int(user_choice)
@@ -105,15 +104,11 @@ class QuoteScraper(Base):
                     print(f"\n{'Quotes Saved Successfully !':*>30}")
                     continue
                 elif user_choice == 6:
-                    clear_txt_file()
-                    print(f"\n{'Quotes Cleared Successfully !':*<30}")
-                    continue
-                elif user_choice == 7:
                     raise ProgramExit(
                         "Exiting program. Thank you for using the scraper!")
                 else:
                     print(
-                        "Invalid choice. Please enter a number between 1 and 7."
+                        "Invalid choice. Please enter a number between 1 and 6."
                     )
 
             except ValueError:

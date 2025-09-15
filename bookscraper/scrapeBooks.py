@@ -121,9 +121,8 @@ user's query."""
             print("*** 2: Load the next page of results")
             print("*** 3: Search Again")
             print("*** 4: Return to the main menu")
-            print("*** 5: Clear books from 'books.csv' file")
-            print("*** 6: Exit the program")
-            user_choice = input("\nPlease choose an option (1-6): ").strip()
+            print("*** 5: Exit the program")
+            user_choice = input("\nPlease choose an option (1-5): ").strip()
 
             try:
                 user_choice = int(user_choice)
@@ -137,17 +136,11 @@ user's query."""
                 elif user_choice == 4:
                     return None
                 elif user_choice == 5:
-                    clear_csv_file()
-                    print("=" * 50)
-                    print()
-                    print(f"{' Cleared Books Successfully ! ':*^30}")
-                    continue
-                elif user_choice == 6:
                     raise ProgramExit(
                         "Exiting program. Thank you for using the scraper!")
                 else:
                     print(
-                        "Invalid choice. Please enter a number between 1 and 6."
+                        "Invalid choice. Please enter a number between 1 and 5."
                     )
 
             except ValueError as e:
@@ -267,7 +260,7 @@ user's query."""
         print(f"\nOpening '{book_title}'...")
         self.actions.move_to_element(selected_book).pause(
             random.uniform(0.1, 0.3)).click().perform()
-        
+
         self.driver.implicitly_wait(10)
 
         book_soup = self.soup(self.driver.page_source)

@@ -8,7 +8,8 @@ def start_reading_files():
         print("\nWhich file do you want to read?")
         print("*** 1: Books ('books.csv' file)")
         print("*** 2: Quotes ('quotes.txt' file)")
-        user_file = input("\nPlease enter an option (1-2) 'E' to cancel: ")
+        user_file = input(
+            "\nPlease enter an option (1-2) 'E' to cancel: ").strip()
 
         try:
             user_file = int(user_file)
