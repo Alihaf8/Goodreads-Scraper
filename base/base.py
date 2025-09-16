@@ -94,11 +94,6 @@ class Base:
 
                 else:
                     print(f"\n{'Enter a number between 1-5':_^10}")
-                    raise UserExit("User requested exit.")
 
             except ValueError:
                 print(f"\n{'Please Enter A Number !':*>20}")
-
-    def launch_page(self):
-        """Navigates to the initial Goodreads URL and initiates the search flow."""
-        self.driver.get(self.url)

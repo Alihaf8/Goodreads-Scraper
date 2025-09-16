@@ -2,8 +2,8 @@ from bookscraper.scrapeBooks import BookScraper
 from quotescraper.scrapeQuotes import QuoteScraper
 from base.base import Base
 from exit.exit import UserExit, ProgramExit
-from filemanager.start_reading_files import start_reading_files
-from filemanager.start_clearing_files import start_clearing_files
+from filemanager.file_ops_menu import start_reading_files
+from filemanager.file_ops_menu import start_clearing_files
 from constants.constants import BASE_URL
 import os
 import random

@@ -8,7 +8,7 @@ import time
 from exit.exit import UserExit, ProgramExit
 from bs4 import BeautifulSoup
 from base.base import Base
-from quotescraper.options.save_to_txt import save_to_txt
+from filemanager.file_ops import save_to_txt
 
 
 class QuoteScraper(Base):
@@ -16,9 +16,17 @@ class QuoteScraper(Base):
     def __init__(self, url, user_agent):
         super().__init__(url, user_agent)
         self.url = url
-        self.quotes = None
-        self.launch_page()
+        self.quotes = []
         self.search_quotes()
+
+    def search_quotes(self):
+        self.close_popup()
+        query = self.user_search_quote()
+        if query is None:
+            return
+        print(f"\nSearching for quote subject '{query}', Please wait...")
+        self.driver.get(f"{self.url}/search?q={query}")
+        self.get_all_quotes(1)
 
     def user_search_quote(self):
         while True:
@@ -29,16 +37,9 @@ class QuoteScraper(Base):
             if user_query == "":
                 print("\nPlease enter a valid, quote subject !")
             elif user_query.lower() == "e":
-                raise UserExit("User requested exit.")
+                return None
             else:
                 return user_query
-
-    def search_quotes(self):
-        self.close_popup()
-        query = self.user_search_quote()
-        print(f"\nSearching for quote subject '{query}', Please wait...")
-        self.driver.get(f"{self.url}/search?q={query}")
-        self.get_all_quotes(1)
 
     def get_all_quotes(self, page):
         current_url = self.driver.current_url

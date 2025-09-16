@@ -8,7 +8,7 @@ import random
 import time
 from exit.exit import UserExit, ProgramExit
 from bs4 import BeautifulSoup
-from bookscraper.options.save_to_csv import save_to_csv
+from filemanager.file_ops import save_to_csv, save_to_json
 
 
 class BookScraper(Base):
@@ -17,11 +17,13 @@ class BookScraper(Base):
         super().__init__(url, user_agent)
         self.url = url
         self.books = []
-        self.launch_page()
         self.search()
 
     def search(self):
         query = self.user_search_query()
+        if query is None:
+            return self.ask_user_for_actions()
+
         print(f"\nSearching for '{query}', Please wait...")
         self.driver.get(f"{self.url}/search?q={query}")
         self.close_popup()
@@ -31,13 +33,13 @@ class BookScraper(Base):
         """Prompts the user for a search query and handles exit requests."""
         while True:
             user_query = input(
-                "\nEnter a book title to search (or 'E' to EXIT): ").strip()
+                "\nEnter a book title to search (or 'E' to cancel): ").strip()
 
             if user_query == "":
                 print("Please enter a search term.")
                 continue
             elif user_query.lower() == "e":
-                raise UserExit("User requested exit. Goodbye!")
+                return None
             else:
                 return user_query
 
@@ -45,6 +47,8 @@ class BookScraper(Base):
         """
         Fetches and displays the list of books from the search results page.
         """
+        if page_number is None:
+            return self.ask_user_for_actions()
         current_url = self.driver.current_url
         self.driver.get(current_url + f"&page={page_number}")
 
@@ -89,9 +93,9 @@ class BookScraper(Base):
                 print(f"{index+1}: {book.text.strip()}")
                 print()
 
-        self.ask_user_for_action()
+        self.ask_user_for_actions()
 
-    def ask_user_for_action(self):
+    def ask_user_for_actions(self):
         """Presents the main menu of actions to the user after displaying results."""
         while True:
             print()
@@ -101,8 +105,9 @@ class BookScraper(Base):
             print("*** 2: Load the next page of results")
             print("*** 3: Search Again")
             print("*** 4: Return to the main menu")
-            print("*** 5: Exit the program")
-            user_choice = input("\nPlease choose an option (1-5): ").strip()
+            print("*** 5: Save a specified book")
+            print("*** 6: Exit the program")
+            user_choice = input("\nPlease choose an option (1-6): ").strip()
 
             try:
                 user_choice = int(user_choice)
@@ -115,15 +120,65 @@ class BookScraper(Base):
                 elif user_choice == 4:
                     return
                 elif user_choice == 5:
+                    self.user_save_choice()
+                    continue
+                elif user_choice == 6:
                     raise ProgramExit(
                         "Exiting program. Thank you for using the scraper!")
                 else:
                     print(
-                        "Invalid choice. Please enter a number between 1 and 5."
+                        "Invalid choice. Please enter a number between 1 and 6."
                     )
 
             except ValueError:
-                print("Invalid choice. Please enter a number between 1 and 5.")
+                print("Invalid choice. Please enter a number between 1 and 6.")
+
+    def user_save_choice(self):
+        while True:
+            print("\nChoose a file to save book info:")
+            print("*** 1: CSV ('books.csv' file)")
+            print("*** 2: JSON ('books.json' file)")
+            user_choice = input(
+                "\nPlease enter an option (1-2), 'E' to cancel: ").strip()
+
+            try:
+                user_choice = int(user_choice)
+                book_index = self.get_user_book_index()
+                if book_index is None:
+                    continue
+
+                else:
+                    selected_book = self.books[book_index]
+                    book_title = selected_book.text.strip()
+                    self.actions.move_to_element(selected_book).pause(
+                        random.uniform(0.1, 0.3)).click().perform()
+                    self.implicitly_wait(10)
+                    book_info = self.book_info(book_title)
+                    if user_choice == 1:
+                        save_to_csv(book_info)
+                        print("=" * 50)
+                        print()
+                        print(f"{' Book saved in CSV file successfully ':^50}")
+                        return
+                    elif user_choice == 2:
+                        save_to_json(book_info)
+                        print("=" * 50)
+                        print()
+                        print(
+                            f"{' Book saved in JSON file successfully ':^50}")
+                        return
+                    else:
+                        print(
+                            "\nInvalid option. Please enter an option between (1-2)."
+                        )
+
+            except ValueError:
+                if str(user_choice).lower() == "e":
+                    return
+                else:
+                    print(
+                        "\nInvalid input. Please enter an option between (1-2)."
+                    )
 
     def get_next_page_number(self):
         """Prompts the user for a page number to navigate to and validates the input."""
@@ -141,7 +196,7 @@ class BookScraper(Base):
 
             except ValueError:
                 if user_input.lower() == "e":
-                    return
+                    return None
                 else:
                     print("Please enter a valid number or 'E'.")
 
@@ -229,21 +284,9 @@ class BookScraper(Base):
         return soup.find(
             "div", class_="DetailsLayoutRightParagraph__widthConstrained").text
 
-    def get_book_details(self):
-        user_index = self.get_user_book_index()
-        selected_book = self.books[user_index]
-        book_title = selected_book.text.strip()
-
-        print(f"\nOpening '{book_title}'...")
-        self.actions.move_to_element(selected_book).pause(
-            random.uniform(0.1, 0.3)).click().perform()
-
-        self.driver.implicitly_wait(10)
-
+    def book_info(self, book_title):
         book_soup = self.soup(self.driver.page_source)
-
-        # Compile all book data into a dictionary
-        book_info = {
+        return {
             "Title": book_title,
             "Author(s)": self.authors(book_soup),
             "Ratings": self.ratings(book_soup),
@@ -255,12 +298,24 @@ class BookScraper(Base):
             "Description": self.description(book_soup),
         }
 
-        save_to_csv(book_info)
+    def get_book_details(self):
+        user_index = self.get_user_book_index()
+        if user_index is None:
+            return self.ask_user_for_actions()
+
+        selected_book = self.books[user_index]
+        book_title = selected_book.text.strip()
+
+        print(f"\nOpening '{book_title}'...")
+        self.actions.move_to_element(selected_book).pause(
+            random.uniform(0.1, 0.3)).click().perform()
+
+        self.driver.implicitly_wait(10)
 
         # Display the compiled book info in a formatted way
         print(f"\n{' BOOK DETAILS ':=^50}")
 
-        for key, value in book_info.items():
+        for key, value in self.book_info(book_title).items():
             print(f"\n{key:>12}: {value}")
 
         print(f"\n{' Saved Book To \'books.csv\' Successfully ':*^30}")
@@ -272,7 +327,7 @@ class BookScraper(Base):
         """Prompts the user to select a book from the list and validates the input."""
         while True:
             user_input = input(
-                f"\nEnter the number of the book you want to see (1-{len(self.books)}), or 'E' to cancel: "
+                f"\nEnter the number of the book (1-{len(self.books)}), or 'E' to cancel: "
             ).strip()
 
             try:
@@ -285,7 +340,7 @@ class BookScraper(Base):
                     )
 
             except ValueError:
-                if user_input.lower() == "e":
+                if str(user_input).lower() == "e":
                     return
                 else:
                     print("Invalid input. Please enter a number or 'E'.")

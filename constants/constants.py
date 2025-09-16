@@ -1,3 +1,4 @@
 BASE_URL = "https://www.goodreads.com/"
 CSV_PATH = r"csv/books.csv"
+JSON_PATH = r"json/books.json"
 QUOTE_PATH = r"txt/quotes.txt"
