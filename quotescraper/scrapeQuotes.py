@@ -9,8 +9,6 @@ from exit.exit import UserExit, ProgramExit
 from bs4 import BeautifulSoup
 from base.base import Base
 from quotescraper.options.save_to_txt import save_to_txt
-from quotescraper.options.clear_txt_file import clear_txt_file
-from quotescraper.options.read_txt_file import read_txt_file
 
 
 class QuoteScraper(Base):
@@ -37,7 +35,9 @@ class QuoteScraper(Base):
 
     def search_quotes(self):
         self.close_popup()
-        self.driver.get(f"{self.url}/search?q={self.user_search_quote()}")
+        query = self.user_search_quote()
+        print(f"\nSearching for quote subject '{query}', Please wait...")
+        self.driver.get(f"{self.url}/search?q={query}")
         self.get_all_quotes(1)
 
     def get_all_quotes(self, page):
@@ -53,15 +53,10 @@ class QuoteScraper(Base):
             print("=" * 50)
             print(f"{text:^50}")
             print("=" * 50)
-            if len(self.quotes) > 1:
-                for i, quote in enumerate(self.quotes, start=1):
-                    print(f"{i}:\n\t{quote.text.strip()}")
-                    print()
 
-            else:
-                print(f"\n\t{quote.text.strip()}")
-
-            print("=" * 50)
+            for i, quote in enumerate(self.quotes, start=1):
+                print(f"{i}:\n\t{quote.text.strip()}")
+                print()
 
         else:
             print(f"\n\n\t{'No Results Found !':*>30}")
@@ -88,10 +83,9 @@ class QuoteScraper(Base):
                 if user_choice == 1:
                     return self.get_all_quotes(self.get_quotes_next_page())
                 elif user_choice == 2:
-                    self.launch_page()
                     return self.search_quotes()
                 elif user_choice == 3:
-                    return None
+                    return
                 elif user_choice == 4:
                     self.save_specified_quote()
                     continue

@@ -33,7 +33,11 @@ A powerful and efficient Python scraper built with Selenium and BeautifulSoup4 t
     git clone https://github.com/Alihaf8/Goodreads-Scraper.git goodreads
     cd goodreads
     ```
+<<<<<<< HEAD
 > **Note:** Do not attempt to change the folder name ``` goodreads ``` ! or the project might get broken.
+=======
+> **Note:** Do not attempt to change the folder name, or the project might get broken.
+>>>>>>> e7ba7f799d223777ae6c61dcae6d30c1a4ebd7a1
 2.  **Install Python dependencies:**
     ```bash
     pip install -r requirements.txt

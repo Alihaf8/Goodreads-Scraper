@@ -8,11 +8,11 @@ from constants.constants import BASE_URL
 import os
 import random
 
-# Important for a vnc server
-os.environ["DISPLAY"] = ":1"
-
 # Agent can be changed
-AGENT = "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64; Xbox; Xbox Series X) AppleWebKit/537.36"
+AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; Xbox; Xbox Series X) AppleWebKit/537.36"
+
+# Important for a vnc server
+# os.environ["DISPLAY"] = ":1"
 
 
 # The main function

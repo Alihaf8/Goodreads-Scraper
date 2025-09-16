@@ -9,7 +9,6 @@ import time
 from exit.exit import UserExit, ProgramExit
 from bs4 import BeautifulSoup
 from bookscraper.options.save_to_csv import save_to_csv
-from bookscraper.options.clear_csv_file import clear_csv_file
 
 
 class BookScraper(Base):
@@ -22,34 +21,9 @@ class BookScraper(Base):
         self.search()
 
     def search(self):
-        """Handles the core search functionality: locates the search bar and enters the
-user's query."""
-        try:
-            # Wait for and locate the search input field
-            search_element = self.wait.until(
-                EC.presence_of_element_located((By.ID, "sitesearch_field")))
-
-            # Simulate human-like interaction: move to element, pause, click, type query, and press ENTER
-            query = self.user_search_query()
-
-            self.actions.move_to_element(search_element).pause(
-                random.uniform(0.4, 0.8)).click()
-            self.actions.perform()
-
-            for letter in query:
-                self.actions.send_keys_to_element(
-                    search_element,
-                    letter).pause(random.uniform(0.05, 0.18)).perform()
-
-            search_element.send_keys(Keys.ENTER)
-        except:
-            try:
-                self.driver.get(
-                    f"{self.url}/search?q={self.user_search_query()}")
-            except Exception as e:
-                print("An error occureded: {e}")
-                raise ProgramExit("Exit program...")
-
+        query = self.user_search_query()
+        print(f"\nSearching for '{query}', Please wait...")
+        self.driver.get(f"{self.url}/search?q={query}")
         self.close_popup()
         self.get_all_books(1)
 
@@ -84,30 +58,36 @@ user's query."""
             return
         else:
             # Find all book title elements on the page
+            self.books = []
             try:
                 self.books = self.wait.until(
                     EC.presence_of_all_elements_located(
                         (By.CSS_SELECTOR, "a[class='bookTitle']")))
 
             except:
-                books_cite = self.wait.until(
-                    EC.presence_of_all_elements_located(
-                        (By.CSS_SELECTOR, "cite[class='bookTitle']")))
+                try:
+                    books_cite = self.wait.until(
+                        EC.presence_of_all_elements_located(
+                            (By.CSS_SELECTOR, "cite[class='bookTitle']")))
+                    for book in books_cite:
+                        self.books.append(book.find_element(By.XPATH, "./a"))
 
-                for book in books_cite:
-                    self.books.append(book.find_element(By.XPATH, "./a"))
+                except Exception as e:
+                    print(
+                        "\nNo books were found ! Try changing user agent.\nError message: %s"
+                        % str(e))
+                    return
 
             text = f"FOUND {len(self.books)} BOOKS ON PAGE {page_number}"
 
             print(f"\n{'='*50}")
             print(f"{text:^50}")
             print(f"{'='*50}")
-
+            print("\n")
             # Enumerate and print each book title
             for index, book in enumerate(self.books):
-                if not book == "":
-                    print(f"{index+1}: {book.text.strip()}")
-                    print()
+                print(f"{index+1}: {book.text.strip()}")
+                print()
 
         self.ask_user_for_action()
 
@@ -117,7 +97,7 @@ user's query."""
             print()
             print("=" * 50)
             print("\nWhat would you like to do next?")
-            print("*** 1: View details of a book (and save book)")
+            print("*** 1: View details of a book")
             print("*** 2: Load the next page of results")
             print("*** 3: Search Again")
             print("*** 4: Return to the main menu")
@@ -131,10 +111,9 @@ user's query."""
                 elif user_choice == 2:
                     return self.get_all_books(self.get_next_page_number())
                 elif user_choice == 3:
-                    self.launch_page()
                     return self.search()
                 elif user_choice == 4:
-                    return None
+                    return
                 elif user_choice == 5:
                     raise ProgramExit(
                         "Exiting program. Thank you for using the scraper!")
@@ -143,8 +122,8 @@ user's query."""
                         "Invalid choice. Please enter a number between 1 and 5."
                     )
 
-            except ValueError as e:
-                print("Invalid input. Please enter a number.\n%s" % str(e))
+            except ValueError:
+                print("Invalid choice. Please enter a number between 1 and 5.")
 
     def get_next_page_number(self):
         """Prompts the user for a page number to navigate to and validates the input."""
@@ -162,8 +141,7 @@ user's query."""
 
             except ValueError:
                 if user_input.lower() == "e":
-                    self.ask_user_for_action()
-                    return None
+                    return
                 else:
                     print("Please enter a valid number or 'E'.")
 
@@ -214,11 +192,11 @@ user's query."""
         return soup.find("p", attrs={"data-testid": "pagesFormat"}).text
 
     def language(self, soup):
+        """Navigates to the 'Details' section and extracts the book's language."""
         try:
-            details_button = self.wait.until(
-                EC.element_to_be_clickable(
-                    (By.CSS_SELECTOR,
-                     "button[aria-label='Book details and editions']")))
+            details_button = self.driver.find_element(
+                By.CSS_SELECTOR,
+                "button[aria-label='Book details and editions']")
 
             self.driver.execute_script("arguments[0].click();", details_button)
 
@@ -254,7 +232,6 @@ user's query."""
     def get_book_details(self):
         user_index = self.get_user_book_index()
         selected_book = self.books[user_index]
-        book_url = selected_book.get_attribute("href")
         book_title = selected_book.text.strip()
 
         print(f"\nOpening '{book_title}'...")
@@ -292,6 +269,7 @@ user's query."""
         return
 
     def get_user_book_index(self):
+        """Prompts the user to select a book from the list and validates the input."""
         while True:
             user_input = input(
                 f"\nEnter the number of the book you want to see (1-{len(self.books)}), or 'E' to cancel: "
@@ -308,7 +286,6 @@ user's query."""
 
             except ValueError:
                 if user_input.lower() == "e":
-                    self.ask_user_for_action()
-                    return None
+                    return
                 else:
                     print("Invalid input. Please enter a number or 'E'.")

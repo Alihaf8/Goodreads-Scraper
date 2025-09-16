@@ -18,6 +18,11 @@ class Base:
         # Configure Chrome browser options
         options = Options()
         options.add_argument("--verbose")
+        # Configure Chrome browser options
+        options = Options()
+        options.add_argument("--no-sandbox")
+        options.add_argument("--verbose")
+        options.add_argument(f"--user-agent={user_agent}")
 
         # Can be disabled for display
         options.add_argument("--headless=new")
@@ -89,6 +94,7 @@ class Base:
 
                 else:
                     print(f"\n{'Enter a number between 1-5':_^10}")
+                    raise UserExit("User requested exit.")
 
             except ValueError:
                 print(f"\n{'Please Enter A Number !':*>20}")
