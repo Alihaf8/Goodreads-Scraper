@@ -24,7 +24,7 @@ A powerful and efficient Python scraper built with Selenium and BeautifulSoup4 t
 *   **Stealthy:** Uses randomized delays and user-agent rotation to appear human.
 *   **Robust:** Handles pop-ups and errors gracefully.
 *   **Menu-Driven:** Easy-to-use text-based interface.
-*   **Data Export:** Save scraped book data to a structured CSV file.
+*   **Data Export:** Save scraped book data to a structured CSV/JSON file. Save scrape quote data to TXT file.
 
 ## 🛠️ Installation
 
