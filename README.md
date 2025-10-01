@@ -24,7 +24,7 @@ A powerful and efficient Python scraper built with Selenium and BeautifulSoup4 t
 *   **Stealthy:** Uses randomized delays and user-agent rotation to appear human.
 *   **Robust:** Handles pop-ups and errors gracefully.
 *   **Menu-Driven:** Easy-to-use text-based interface.
-*   **Data Export:** Save scraped book data to a structured CSV file.
+*   **Data Export:** Save scraped book data to a structured CSV/JSON file. Save scrape quote data to TXT file.
 
 ## 🛠️ Installation
 
@@ -33,11 +33,7 @@ A powerful and efficient Python scraper built with Selenium and BeautifulSoup4 t
     git clone https://github.com/Alihaf8/Goodreads-Scraper.git goodreads
     cd goodreads
     ```
-<<<<<<< HEAD
-> **Note:** Do not attempt to change the folder name ``` goodreads ``` ! or the project might get broken.
-=======
 > **Note:** Do not attempt to change the folder name, or the project might get broken.
->>>>>>> e7ba7f799d223777ae6c61dcae6d30c1a4ebd7a1
 2.  **Install Python dependencies:**
     ```bash
     pip install -r requirements.txt

@@ -9,6 +9,7 @@ import random
 import time
 from exit.exit import UserExit, ProgramExit
 from bs4 import BeautifulSoup
+import lxml
 
 
 class Base:
@@ -35,7 +36,7 @@ class Base:
         options.add_argument("--disable-notifications")
         options.add_argument("--mute-audio")
 
-        # Disable image for boosting (Can be removed for display)
+        # Disable image for boosting
         prefs = {"profile.managed_default_content_settings.images": 2}
         options.add_experimental_option("prefs", prefs)
 
@@ -47,7 +48,7 @@ class Base:
 
     def soup(self, source):
         """Creates a BeautifulSoup object from HTML source for easier parsing."""
-        return BeautifulSoup(source, "html.parser")
+        return BeautifulSoup(source, "lxml")
 
     def close_popup(self):
         """Attempts to detect and close any modal popup by refreshing the page."""
@@ -55,7 +56,6 @@ class Base:
         current_url = self.driver.current_url
 
         try:
-            # Check for a common modal popup
             modal_popup = self.soup(self.driver.page_source).find(
                 "div", class_="modal__content")
             if modal_popup:

@@ -17,15 +17,17 @@ class BookScraper(Base):
         super().__init__(url, user_agent)
         self.url = url
         self.books = []
+        self.search_url = None
         self.search()
 
     def search(self):
         query = self.user_search_query()
         if query is None:
-            return self.ask_user_for_actions()
+            return
 
         print(f"\nSearching for '{query}', Please wait...")
         self.driver.get(f"{self.url}/search?q={query}")
+        self.search_url = self.driver.current_url
         self.close_popup()
         self.get_all_books(1)
 
@@ -39,7 +41,7 @@ class BookScraper(Base):
                 print("Please enter a search term.")
                 continue
             elif user_query.lower() == "e":
-                return None
+                return
             else:
                 return user_query
 
@@ -49,8 +51,8 @@ class BookScraper(Base):
         """
         if page_number is None:
             return self.ask_user_for_actions()
-        current_url = self.driver.current_url
-        self.driver.get(current_url + f"&page={page_number}")
+
+        self.driver.get(self.search_url + f"&page={page_number}")
 
         page_soup = self.soup(self.driver.page_source)
 
@@ -144,29 +146,32 @@ class BookScraper(Base):
             try:
                 user_choice = int(user_choice)
                 book_index = self.get_user_book_index()
-                if book_index is None:
-                    continue
 
-                else:
+                if book_index is not None:
+                    print()
+                    print("Saving book, Please wait...")
+
                     selected_book = self.books[book_index]
                     book_title = selected_book.text.strip()
                     self.actions.move_to_element(selected_book).pause(
                         random.uniform(0.1, 0.3)).click().perform()
-                    self.implicitly_wait(10)
+
+                    self.driver.implicitly_wait(10)
+
                     book_info = self.book_info(book_title)
                     if user_choice == 1:
                         save_to_csv(book_info)
                         print("=" * 50)
                         print()
                         print(f"{' Book saved in CSV file successfully ':^50}")
-                        return
+                        return self.get_all_books(1)
                     elif user_choice == 2:
                         save_to_json(book_info)
                         print("=" * 50)
                         print()
                         print(
                             f"{' Book saved in JSON file successfully ':^50}")
-                        return
+                        return self.get_all_books(1)
                     else:
                         print(
                             "\nInvalid option. Please enter an option between (1-2)."
@@ -196,7 +201,7 @@ class BookScraper(Base):
 
             except ValueError:
                 if user_input.lower() == "e":
-                    return None
+                    return
                 else:
                     print("Please enter a valid number or 'E'.")
 
@@ -212,11 +217,20 @@ class BookScraper(Base):
         if uni_author_names:
             return "; ".join(author_names)
         else:
-            return "Not available"
+            return "N/A"
 
     def ratings(self, soup):
         """Extracts the average rating from the book page."""
-        return soup.find("div", class_="RatingStatistics__rating").text
+        try:
+            return '; '.join([
+                soup.find("div", class_="RatingStatistics__rating").get_text(),
+                soup.find("span", attrs={
+                    "data-testid": "ratingsCount"
+                }).get_text()
+            ])
+
+        except:
+            return "N/A"
 
     def genres(self, soup):
         genre_text = []
@@ -232,21 +246,22 @@ class BookScraper(Base):
                 "span", class_="BookPageMetadataSection__genreButton")
 
             for genre in genre_elements:
-                genre_text.append(genre.text)
+                genre_text.append(genre.get_text())
 
             return "; ".join(genre_text)
 
-        except Exception as e:
-            print(f"Error expanding genres: {e}")
-            raise ProgramExit("A critical error occurred. Exiting...")
+        except:
+            return "N/A"
 
     def publishing(self, soup):
-        return soup.find("p", attrs={"data-testid": "publicationInfo"}).text
+        return soup.find("p", attrs={
+            "data-testid": "publicationInfo"
+        }).get_text()
 
     def pages(self, soup):
-        return soup.find("p", attrs={"data-testid": "pagesFormat"}).text
+        return soup.find("p", attrs={"data-testid": "pagesFormat"}).get_text()
 
-    def language(self, soup):
+    def language(self):
         """Navigates to the 'Details' section and extracts the book's language."""
         try:
             details_button = self.driver.find_element(
@@ -255,17 +270,25 @@ class BookScraper(Base):
 
             self.driver.execute_script("arguments[0].click();", details_button)
 
-            language_element = self.wait.until(
+            return self.wait.until(
                 EC.presence_of_element_located((
                     By.XPATH,
                     "//dt[contains(text(), 'Language')]/following-sibling::*[1]"
-                )))
-            return language_element.text
+                ))).text
 
         except:
-            return "Not Available"
+            return "N/A"
 
-    def characters(self, soup):
+    def isbn(self):
+        try:
+            return self.driver.find_element(
+                By.XPATH,
+                "//dt[contains(text(), 'ISBN')]/following-sibling::*[1]").text
+
+        except:
+            return "N/A"
+
+    def characters(self):
         try:
             character_elements = self.wait.until(
                 EC.presence_of_all_elements_located(
@@ -278,13 +301,18 @@ class BookScraper(Base):
                 return "; ".join(character_names)
 
         except Exception as e:
-            return "Not Available"
+            return "N/A"
 
     def description(self, soup):
         return soup.find(
-            "div", class_="DetailsLayoutRightParagraph__widthConstrained").text
+            "div",
+            class_="DetailsLayoutRightParagraph__widthConstrained").get_text()
 
     def book_info(self, book_title):
+        self.driver.implicitly_wait(10)
+        self.wait.until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "div.BookPage__mainContent")))
         book_soup = self.soup(self.driver.page_source)
         return {
             "Title": book_title,
@@ -293,8 +321,9 @@ class BookScraper(Base):
             "Genre(s)": self.genres(book_soup),
             "Published": self.publishing(book_soup),
             "Pages": self.pages(book_soup),
-            "Language": self.language(book_soup),
-            "Character(s)": self.characters(book_soup),
+            "Language": self.language(),
+            "ISBN": self.isbn(),
+            "Character(s)": self.characters(),
             "Description": self.description(book_soup),
         }
 
@@ -310,18 +339,15 @@ class BookScraper(Base):
         self.actions.move_to_element(selected_book).pause(
             random.uniform(0.1, 0.3)).click().perform()
 
-        self.driver.implicitly_wait(10)
-
         # Display the compiled book info in a formatted way
         print(f"\n{' BOOK DETAILS ':=^50}")
 
         for key, value in self.book_info(book_title).items():
             print(f"\n{key:>12}: {value}")
 
-        print(f"\n{' Saved Book To \'books.csv\' Successfully ':*^30}")
-
-        # Return to search after viewing details
-        return
+        # Return to menu after viewing details
+        self.get_all_books(1)
+        return self.ask_user_for_actions()
 
     def get_user_book_index(self):
         """Prompts the user to select a book from the list and validates the input."""

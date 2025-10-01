@@ -1,6 +1,3 @@
 selenium
 bs4
-<<<<<<< HEAD
-=======
-shadow_useragent
->>>>>>> e7ba7f799d223777ae6c61dcae6d30c1a4ebd7a1
+requests

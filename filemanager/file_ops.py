@@ -38,7 +38,7 @@ def clear_csv_file():
     else:
         header = [
             "Title", "Author(s)", "Ratings", "Genre(s)", "Publish", "Page",
-            "Language", "Character(s)", "Description"
+            "Language", "ISBN", "Character(s)", "Description"
         ]
         with open(CSV_PATH, "w", newline="") as f:
             csv_writer = csv.writer(f)
@@ -70,8 +70,9 @@ def read_csv_file():
                     print(f"\n\tPublish: {row[4]}")
                     print(f"\n\tPages: {row[5]}")
                     print(f"\n\tLanguage: {row[6]}")
-                    print(f"\n\rCharacter(s): {row[7]}")
-                    print(f"\n\n\tDescription: {row[8]}")
+                    print(f"\n\tISBN: {row[7]}")
+                    print(f"\n\rCharacter(s): {row[8]}")
+                    print(f"\n\n\tDescription: {row[9]}")
                     print("\n\n\n")
 
                 else:
