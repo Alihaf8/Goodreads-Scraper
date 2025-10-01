@@ -18,12 +18,6 @@ class Base:
         """Initializes the scraper, sets up the browser, and launches the starting page."""
         # Configure Chrome browser options
         options = Options()
-        options.add_argument("--verbose")
-        # Configure Chrome browser options
-        options = Options()
-        options.add_argument("--no-sandbox")
-        options.add_argument("--verbose")
-        options.add_argument(f"--user-agent={user_agent}")
 
         # Can be disabled for display
         options.add_argument("--headless=new")
