@@ -166,8 +166,11 @@ def read_json_file():
         )
 
     else:
-        with open(JSON_PATH, "r", newline="") as f:
-            content = json.load(f)
-            print("\n\n")
-            for key, value in content.items():
-                print(f"{key}: {value}\n\n")
+        try:
+            with open(JSON_PATH, "r", newline="") as f:
+                content = json.load(f)
+                print("\n\n")
+                for key, value in content.items():
+                    print(f"{key}: {value}\n\n")
+        except json.JSONDecodeError:
+            print("JSON file empty !")
